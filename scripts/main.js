@@ -38,8 +38,8 @@
 .dropdown:hover .dropbtn {background-color: #3e8e41;}  
 <` + `/style><l` + `ink rel="stylesheet" href="../application.css" media="all"></h` + `ead><bo` + `dy class="h-100"><di` + `v class="home"><` + `article class='hexlet-typography overflow-hidden'>`;
     const footer = `<` + `/article></` + `div></` + `body></` + `html>`;
-  </script>
-  <script>
+  
+  
 // выводим шапку и футер страницы
 
  $(document).ready(function() {
