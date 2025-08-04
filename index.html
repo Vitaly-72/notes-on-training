@@ -10,36 +10,35 @@
 </head>
 
 <body>
-  <div class="container">
+   <div class="container">
     <div id="main">
-      <h1>Редактор заметок</h1>
-      
-      <div class="form-group">
-        <label for="name_kurs">Название документа:</label>
-        <input type="text" id="name_kurs" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="punkt_menu">Название статьи:</label>
-        <input type="text" id="punkt_menu" class="form-control">
-      </div>
-      
-      <div class="form-group">
-        <label for="lesson">Текст статьи:</label>
-        <textarea id="lesson" class="form-control"></textarea>
-      </div>
+      Название документа
+      <input type="text" id="name_kurs">
+      <br>
+      <br>
+      <br> Название статьи
+      <input type="text" id="punkt_menu">
+      <br>
+      <br>
+      <br> Текст статьи
+      <br>
 
-      <div class="button-group">
-        <button type="button" id="btn" class="btn">Добавить новую статью</button>
-        <button type="button" id="apply-btn" class="btn">Применить изменения</button>
-        <button type="button" id="clear-btn" class="btn">Очистить содержимое</button>
-        <button type="button" id="save-btn" class="btn">Сохранить документ</button>
-      </div>
+      <form>
+        <textarea id="lesson"></textarea>
+        <br>
 
-      <div class="file-upload">
-        <label for="file-input">Загрузить файл для редактирования:</label>
-        <input type="file" id="file-input" accept=".html">
-      </div>
+      </form>
+
+      <br>
+      <input type="button" id="btn" value="Добавить новую статью" onclick="" />
+      <input type="button" onclick="addNew()" value="Применить изменения" />
+	   <input type="button" onclick="remove()" value="Очистить содержимое" />
+      <br>
+      <br>
+      <input type="button" onclick="saveFile()" value="Сохранить документ" />
+      <br>
+      <br> Загрузить файл для редактирования
+      <input type="file" id="file-input" accept=".html">
     </div>
 
     <div id="menu_kursa"></div>
@@ -54,8 +53,10 @@
     <pre id="script"></pre>
     <pre id="save_obj"></pre>
     <pre id="footer"></pre>
+
   </div>
 
   <div id="data" style="display: none"></div>
 </body>
 </html>
+
