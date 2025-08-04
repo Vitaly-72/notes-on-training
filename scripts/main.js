@@ -57,165 +57,158 @@ const head_html = `<!DOCTYPE html>
 
 const footer = `<\/article><\/div><\/body><\/html>`;
 
-// Переменные для динамического контента
-let menu_txt = '';
-let style_txt = '';
-let menuObj = {};
-let contentObj = {};
-let styleObj = {};
-let title = '';
-let punkt = 1;
+// выводим шапку и футер страницы
 
-// Инициализация документа
-$(document).ready(function() {
-    // Создаем контейнеры если их нет
-    if ($("#head").length === 0) {
-        $("body").prepend('<div id="head"></div>');
-    }
-    if ($("#footer").length === 0) {
-        $("body").append('<div id="footer"></div>');
-    }
-    
-    // Вставляем шапку и футер
-    $("#head").html(head_html);
-    $("#footer").html(footer);
-    
-    // Назначаем обработчики событий
-    $("#btn").on("click", creatObj);
-    $("#file-input").on("change", handleFileUpload);
-});
+ $(document).ready(function() {
+     $("#head").text(head_html);
+     $("#footer").text(footer);
+ });
+ 
+ // создаем пустые переменные для динамического заполения, нажатием кнопки "добавить"
+ 
+ let menu_txt = '';
+ let style_txt = '';
+ let menuObj = {};
+ let contentObj = {};
+ let styleObj = {};
+ let title = '';
+ 
+ // Функция добавляем в обьекты свойства: Название документа, название статьи, контент, стили скрытия статей
+ 
+ const creatObj = () => {
+         if (Object.keys(contentObj).length == 0) {
+             i = 1
+         } else {
+             i = Object.keys(contentObj).length + 1;
+         }
+         title = document.getElementById("name_kurs").value;
+         menuObj[`art${i}`] = document.getElementById("punkt_menu").value;
+         contentObj[`art${i}`] = document.getElementById("lesson").value;
+         if (i == 1) {
+             style_txt += `#art_${i}{display:block}`
+         } else {
+             style_txt = `#art_${i}{display:none}`;
+         }
+         styleObj[`art${i}`] = style_txt;
+         i += 1;
+         console.log(title);
+         console.log(menuObj);
+         console.log(contentObj);
+         console.log(styleObj);
+         addArticlesPage();
+         remove();
+     }
 
-// Функции
-function creatObj() {
-    const i = Object.keys(contentObj).length === 0 ? 1 : Object.keys(contentObj).length + 1;
-    
-    title = $("#name_kurs").val();
-    menuObj[`art${i}`] = $("#punkt_menu").val();
-    contentObj[`art${i}`] = $("#lesson").val();
-    
-    style_txt = i === 1 ? `#art_${i}{display:block}` : `#art_${i}{display:none}`;
-    styleObj[`art${i}`] = style_txt;
-    
-    console.log({title, menuObj, contentObj, styleObj});
-    addArticlesPage();
-    clearInputs();
-}
+// функция вывода статей и меню при загрузки сохраненного документа в редакторе
 
-function crObj() {
-    if (typeof menuObj2 !== 'undefined') menuObj = menuObj2;
-    if (typeof contentObj2 !== 'undefined') contentObj = contentObj2;
-    if (typeof styleObj2 !== 'undefined') styleObj = styleObj2;
-    if (typeof title2 !== 'undefined') $("#name_kurs").val(title2);
-    if (menuObj.art1) $("#punkt_menu").val(menuObj.art1);
-    if (contentObj.art1) $("#lesson").val(contentObj.art1);
-}
+ const crObj = () => {
+     menuObj = menuObj2;
+     contentObj = contentObj2;
+     styleObj = styleObj2;
+     document.getElementById("name_kurs").value = title2;
+     document.getElementById("punkt_menu").value = menuObj2.art1;
+     document.getElementById("lesson").value = contentObj2.art1;
+ }
+ const addArticlesPage = () => {
+     menuObj3 = {};
+     contentObj3 = {};
+     styleObj3 = {};
+     let creatMenu = '';
+     let creatCourse = '';
+     let creatStyle = '';
+     let cretScript = '';
+     let creatMenuObj = '';
+     let creatContentObj = '';
+     let creatStyleObj = '';
+     let creatMenuCourse = '';
+     index = 1;
+     
+	 // Добавляем пункты в меню страницы курса
+     for (key in menuObj) {
+         creatMenu += `<\div id="menu_${index}"><\a href="#" >${index}. ${menuObj[key]}</a></div>`;
+         creatMenuObj += `art${index}: '${menuObj[key]}',`;
+         creatMenuCourse += `<li onclick="add(contentObj.art${index}, menuObj.art${index}); punkt = ${index}" >${index}. ${menuObj[key]} &nbsp;&nbsp; <input type="button" onclick="addArticlesPage(); delete menuObj['art${index}']; delete contentObj['art${index}']; delete  styleObj['art${index}']; addArticlesPage();" value="X" /></li>`
+         menuObj3[`art${index}`] = `${menuObj[key]}`;
+         index += 1;
+     }
+    
+     $("#menu").text("<di" + "v class='menu'><di" + "v class='dropdown'><but" + "ton class='dropbtn'>Меню</" + "button><di" + "v class='dropdown-content'>" + creatMenu + "</" + "div></" + "div></" + "div>");
+     
+    // Добавляем статьи на страницу курса, стили не актывных статей, скрипт работы меню и сохраняем объекты
 
-function addArticlesPage() {
-    let creatMenu = '';
-    let creatCourse = '';
-    let creatStyle = '';
-    let cretScript = '';
-    let creatMenuObj = '';
-    let creatContentObj = '';
-    let creatStyleObj = '';
-    let creatMenuCourse = '';
-    
-    // Генерация меню
-    Object.keys(menuObj).forEach((key, index) => {
-        const i = index + 1;
-        creatMenu += `<div id="menu_${i}"><a href="#">${i}. ${menuObj[key]}</a></div>`;
-        creatMenuObj += `art${i}: '${menuObj[key]}',`;
-        creatMenuCourse += `<li onclick="add(contentObj.art${i}, menuObj.art${i}); punkt = ${i}">
-            ${i}. ${menuObj[key]} &nbsp;&nbsp;
-            <input type="button" onclick="deleteArticle(${i})" value="X" />
-        </li>`;
-        cretScript += `$("#menu_${i}").on("click", () => showDiv('art_${i}'));`;
-    });
-    
-    // Генерация контента
-    Object.keys(contentObj).forEach((key, index) => {
-        const i = index + 1;
-        creatCourse += `<div id="art_${i}" class="art">${contentObj[key]}</div>`;
-        creatContentObj += `art${i}: \`${contentObj[key].replace(/`/g, '\\`')}\`,`;
-        creatStyle += i === 1 ? `#art_${i}{display:block}` : `#art_${i}{display:none}`;
-        creatStyleObj += `art${i}: '#art_${i}{display:${i === 1 ? 'block' : 'none}'},`;
-    });
-    
-    // Вставка сгенерированного HTML
-    $("#menu").html(`<div class="menu">
-        <div class="dropdown">
-            <button class="dropbtn">Меню</button>
-            <div class="dropdown-content">${creatMenu}</div>
-        </div>
-    </div>`);
-    
-    $("#article").html(creatCourse);
-    $("#style").html(`<style>${creatStyle}</style>`);
-    $("#menu_kursa").html(`<ul>${creatMenuCourse}</ul>`);
-    
-    // Генерация скрипта
-    $("#script").html(`<script>
-        const showDiv = (id) => {
-            $(".art").hide();
-            $("#" + id).show();
-        }
-        ${cretScript}
-        title2 = '${title.replace(/'/g, "\\'")}';
-        menuObj2 = {${creatMenuObj}};
-        contentObj2 = {${creatContentObj}};
-        styleObj2 = {${creatStyleObj}};
-        let checkObj = 1;
-    <\/script>`);
-}
+     index2 = 1;
+     for (key in contentObj) {
+         creatCourse += `<div id="art_${index2}" class="art">${contentObj[key]}</div>`;
+         creatContentObj += `art${index2}: \`${contentObj[key]}\`,`;
+         contentObj3[`art${index2}`] = `${contentObj[key]}`;
+         if (index2 == 1) {
+             creatStyle += `#art_${index2}{display:block}`;
+             creatStyleObj += `art${index2}: '#art_${index2}{display:block}',`;
+             styleObj3[`art${index2}`] = `{display:block}`;
+         } else {
+             creatStyle += `#art_${index2}{display:none}`;
+             creatStyleObj += `art${index2}: '#art_${index2}{display:none}',`;
+             styleObj3[`art${index2}`] = `{display:none}`;
+         }
+         cretScript += ` menu_${index2}.addEventListener("click", () => showDiv('art_${index2}')); `
+         $("#script").text("<sc" + "ript> const showDiv = (id) => {$('.art').hide();$('#' + id).show();} \n	" + cretScript + "\n" + "title2 = '" + title + "'\n" + "menuObj2 = {" + creatMenuObj + "};\n" + "contentObj2 = {" + creatContentObj + "};\n" + "styleObj2 = {" + creatStyleObj + "};\n" + "let checkObj = 1;\n" + "</" + "script>");
+         index2 += 1;
+     }
+     $("#article").text(creatCourse);
+     $("#style").text('<style>' + creatStyle + '</style>');
+     
+	 // Создание меню с текстом статей в редакторе
+	 
+     $("#menu_kursa").html('<ul>' + creatMenuCourse + '</ul>');
+     menuObj = menuObj3;
+     contentObj = contentObj3;
+     styleObj = styleObj3;
+ }
+ const remove = () => {
+     document.getElementById("punkt_menu").value = '';
+     document.getElementById("lesson").value = '';
+ }
+ const add = (id, number) => {
+         document.getElementById("lesson").value = id;
+         document.getElementById("punkt_menu").value = number;
+     }
+     
+// функция изменения текста статьи
 
-function clearInputs() {
-    $("#punkt_menu").val('');
-    $("#lesson").val('');
-}
+ punkt = 1;
+ const addNew = () => {
+     contentObj[`art${punkt}`] = document.getElementById("lesson").value;
+     menuObj[`art${punkt}`] = document.getElementById("punkt_menu").value;
+     addArticlesPage();
+ }
+ btn.addEventListener("click", creatObj);
+ 
+// сохранение в html файл, подумать как пересохранять файл при его изменении в тоже места и с тем же именем
 
-function add(content, menuText) {
-    $("#lesson").val(content);
-    $("#punkt_menu").val(menuText);
-}
+ const saveFile = () => {
+         let url = document.getElementById("name_kurs").value;
+         let textToWrite = document.getElementById("divcopy").innerText;
+         let textFileAsBlob = new Blob([textToWrite], {
+             type: 'text/plain'
+         });
+         let downloadLink = document.createElement("a");
+         downloadLink.download = url + ".html";
+         downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+         downloadLink.click();
+     }
 
-function addNew() {
-    contentObj[`art${punkt}`] = $("#lesson").val();
-    menuObj[`art${punkt}`] = $("#punkt_menu").val();
-    addArticlesPage();
-}
-
-function deleteArticle(index) {
-    delete menuObj[`art${index}`];
-    delete contentObj[`art${index}`];
-    delete styleObj[`art${index}`];
-    addArticlesPage();
-}
-
-function saveFile() {
-    const fileName = $("#name_kurs").val() || "untitled";
-    const htmlContent = $("#divcopy").html();
-    
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        $("#data").html(e.target.result);
-        setTimeout(crObj, 2000);
-        setTimeout(addArticlesPage, 3000);
-    };
-    reader.readAsText(file);
-}
+// функция загрузки html файла для редактирования
+	
+ $("#file-input").change(function() {
+     let file = this.files[0];
+     let url = URL.createObjectURL(file);
+     $.ajax({
+         url: url,
+         dataType: "html",
+         success: function(data) {
+             $("#data").html(data);
+         }
+     });
+     setTimeout(crObj, 2000);
+     setTimeout(addArticlesPage, 3000);
+ });
