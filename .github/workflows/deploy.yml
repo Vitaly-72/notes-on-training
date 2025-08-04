@@ -1,14 +1,24 @@
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main, master]
+ contents: write
+  pages: write
+  id-token: write  # Необходимо для OIDC
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v3
       
-      - name: Deploy
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: '.'  # Путь к файлам (корень репозитория)
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v1
