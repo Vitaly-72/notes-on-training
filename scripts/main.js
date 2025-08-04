@@ -256,7 +256,22 @@ function saveFile() {
     return;
   }
 
-  // Собираем полный HTML документ
+  // Генерируем содержимое меню
+  let menuItems = '';
+  Object.keys(menuObj).forEach((key, index) => {
+    const artId = `art_${index + 1}`;
+    menuItems += `<a href="#" onclick="showArticle('${artId}')">${index + 1}. ${menuObj[key]}</a>`;
+  });
+
+  // Генерируем содержимое статей
+  let articles = '';
+  Object.keys(contentObj).forEach((key, index) => {
+    const artId = `art_${index + 1}`;
+    const displayStyle = index === 0 ? 'block' : 'none';
+    articles += `<div id="${artId}" class="art" style="display:${displayStyle}">${contentObj[key]}</div>`;
+  });
+
+  // Полный HTML документ
   const fullHtml = `
 <!DOCTYPE html>
 <html lang="ru">
@@ -265,58 +280,92 @@ function saveFile() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
-    .home { width: 750px; margin: 0 auto; }
-    .menu { position: absolute; top: 20px; left: 20px; }
-    .dropdown { position: relative; display: inline-block; z-index: 9999; }
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+    }
+    .menu {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
     .dropbtn {
       background-color: #4CAF50;
       color: white;
-      padding: 16px;
-      font-size: 14px;
+      padding: 12px 16px;
+      font-size: 16px;
       border: none;
       cursor: pointer;
+      border-radius: 4px;
     }
     .dropdown-content {
       display: none;
       position: absolute;
       background-color: #f9f9f9;
-      min-width: 320px;
+      min-width: 250px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
       z-index: 1;
+      border-radius: 4px;
     }
     .dropdown-content a {
       color: black;
       padding: 12px 16px;
       text-decoration: none;
       display: block;
+      transition: background-color 0.3s;
     }
-    .dropdown-content a:hover { background-color: #f1f1f1 }
-    .dropdown:hover .dropdown-content { display: block; }
-    .dropdown:hover .dropbtn { background-color: #3e8e41; }
-    .art { display: none; }
-    ${Object.entries(styleObj).map(([key, style]) => style).join('\n')}
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown:hover .dropbtn {
+      background-color: #3e8e41;
+    }
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .art {
+      display: none;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-  <div class="home">
-    ${$("#menu").html()}
-    ${Object.entries(contentObj).map(([key, content], index) => `
-      <div id="art_${index+1}" class="art">
-        ${content}
+  <div class="menu">
+    <div class="dropdown">
+      <button class="dropbtn">Меню</button>
+      <div class="dropdown-content">
+        ${menuItems}
       </div>
-    `).join('')}
+    </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <div class="content">
+    ${articles}
+  </div>
+
   <script>
-    $(document).ready(function() {
-      $('.dropdown-content a').click(function(e) {
-        e.preventDefault();
-        const artId = $(this).attr('href').substring(1);
-        $('.art').hide();
-        $('#' + artId).show();
+    function showArticle(artId) {
+      document.querySelectorAll('.art').forEach(art => {
+        art.style.display = 'none';
       });
-    });
+      document.getElementById(artId).style.display = 'block';
+      return false;
+    }
   </script>
 </body>
 </html>
