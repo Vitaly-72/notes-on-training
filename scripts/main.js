@@ -98,19 +98,48 @@ function createArticle() {
 }
 
 // Обновление существующей статьи
-function updateArticle() {
-  const articleTitle = $("#punkt_menu").val().trim();
-  const articleContent = $("#lesson").val().trim();
+function updateArticlesView() {
+  let menuHtml = '';
+  let articlesHtml = '';
+  let styleHtml = '';
   
-  if (!currentArticle || !articleTitle || !articleContent) {
-    alert("Выберите статью для редактирования");
-    return;
-  }
+  Object.entries(menuObj).forEach(([key, title], index) => {
+    const artId = `art_${index+1}`;
+    
+    // Меню для экспорта
+    menuHtml += `<a href="#${artId}">${index+1}. ${title}</a>`;
+    
+    // Статьи
+    articlesHtml += `<div id="${artId}" class="art">${contentObj[key]}</div>`;
+    
+    // Стили
+    styleHtml += index === 0 
+      ? `#${artId}{display:block}`
+      : `#${artId}{display:none}`;
+  });
   
-  menuObj[`art${currentArticle}`] = articleTitle;
-  contentObj[`art${currentArticle}`] = articleContent;
+  // Обновляем элементы для экспорта
+  $("#menu").html(`
+    <div class="menu">
+      <div class="dropdown">
+        <button class="dropbtn">Меню</button>
+        <div class="dropdown-content">${menuHtml}</div>
+      </div>
+    </div>
+  `);
   
-  updateArticlesView();
+  $("#article").html(articlesHtml);
+  $("#style").text(styleHtml);
+  
+  // Обновляем меню редактора
+  const editorMenu = Object.entries(menuObj).map(([key, title], index) => `
+    <li onclick="loadArticle(${index+1})">
+      ${index+1}. ${title}
+      <button type="button" onclick="event.stopPropagation(); deleteArticle(${index+1})">X</button>
+    </li>
+  `).join('');
+  
+  $("#menu_kursa").html(`<ul>${editorMenu}</ul>`);
 }
 
 // Очистка полей ввода
@@ -226,11 +255,76 @@ function saveFile() {
     alert("Введите название документа");
     return;
   }
-  
-  const textToWrite = document.getElementById("divcopy").innerText;
-  const blob = new Blob([textToWrite], { type: 'text/html' });
+
+  // Собираем полный HTML документ
+  const fullHtml = `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    .home { width: 750px; margin: 0 auto; }
+    .menu { position: absolute; top: 20px; left: 20px; }
+    .dropdown { position: relative; display: inline-block; z-index: 9999; }
+    .dropbtn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 16px;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      min-width: 320px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover { background-color: #f1f1f1 }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown:hover .dropbtn { background-color: #3e8e41; }
+    .art { display: none; }
+    ${Object.entries(styleObj).map(([key, style]) => style).join('\n')}
+  </style>
+</head>
+<body>
+  <div class="home">
+    ${$("#menu").html()}
+    ${Object.entries(contentObj).map(([key, content], index) => `
+      <div id="art_${index+1}" class="art">
+        ${content}
+      </div>
+    `).join('')}
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('.dropdown-content a').click(function(e) {
+        e.preventDefault();
+        const artId = $(this).attr('href').substring(1);
+        $('.art').hide();
+        $('#' + artId).show();
+      });
+    });
+  </script>
+</body>
+</html>
+  `;
+
+  // Создаем и скачиваем файл
+  const blob = new Blob([fullHtml], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  
   const a = document.createElement('a');
   a.href = url;
   a.download = `${title}.html`;
