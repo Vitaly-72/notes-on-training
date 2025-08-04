@@ -224,6 +224,7 @@ function clearFields() {
   $("#lesson").val('');
 }
 
+
 // Сохранение в файл
 function saveFile() {
   if (!title) {
@@ -235,6 +236,21 @@ function saveFile() {
     alert("Добавьте хотя бы одну статью");
     return;
   }
+
+  // Генерируем меню
+  let menuItems = '';
+  Object.keys(menuObj).forEach((key, index) => {
+    const artId = `art_${index + 1}`;
+    menuItems += `<a href="#" data-article="${artId}">${index + 1}. ${menuObj[key]}</a>`;
+  });
+
+  // Генерируем статьи
+  let articles = '';
+  Object.keys(contentObj).forEach((key, index) => {
+    const artId = `art_${index + 1}`;
+    const displayStyle = index === 0 ? 'block' : 'none';
+    articles += `<div id="${artId}" class="art" style="display:${displayStyle}">${contentObj[key]}</div>`;
+  });
 
   // Полный HTML документ
   const fullHtml = `
@@ -307,17 +323,47 @@ function saveFile() {
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    ${$("#style").text()}
   </style>
 </head>
 <body>
-  ${$("#menu").html()}
-
-  <div class="content">
-    ${$("#article").html()}
+  <div class="menu">
+    <div class="dropdown">
+      <button class="dropbtn">Меню</button>
+      <div class="dropdown-content">
+        ${menuItems}
+      </div>
+    </div>
   </div>
 
-  ${$("#script").html()}
+  <div class="content">
+    ${articles}
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Добавляем обработчики кликов на пункты меню
+      document.querySelectorAll('.dropdown-content a').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const articleId = this.getAttribute('data-article');
+          
+          // Скрываем все статьи
+          document.querySelectorAll('.art').forEach(art => {
+            art.style.display = 'none';
+          });
+          
+          // Показываем выбранную статью
+          document.getElementById(articleId).style.display = 'block';
+        });
+      });
+      
+      // Данные для загрузки обратно в редактор
+      const title2 = '${title}';
+      const menuObj2 = ${JSON.stringify(menuObj)};
+      const contentObj2 = ${JSON.stringify(contentObj)};
+      const styleObj2 = ${JSON.stringify(styleObj)};
+    });
+  </script>
 </body>
 </html>
   `;
