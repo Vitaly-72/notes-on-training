@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, master]  # Активируется при пуше в эти ветки
-  workflow_dispatch:         # Позволяет запускать вручную
+    branches: [main, master]  
+  workflow_dispatch:         
 
 jobs:
   deploy:
@@ -19,12 +19,12 @@ jobs:
           node-version: '16'
           
       - name: Install dependencies (if any)
-        run: npm ci  # Пропустите, если нет package.json
+        run: npm ci  
       
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./            # Корневая директория с index.html
-          keep_files: false          # Очищать перед деплоем
-          force_orphan: true         # Всегда использовать одну ветку
+          publish_dir: ./            
+          keep_files: false          
+          force_orphan: true         
