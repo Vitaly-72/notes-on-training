@@ -1,9 +1,15 @@
     // константы Шапки и футера
-    const head_html = `<!DOCTYPE html><html lang="ru" prefix="og: http` + `s://ogp.me/ns#"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="IE=Edge" http-equiv="X-UA-Compatible"><script src="http` + `s://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></scri` + `pt><ti` + `tle><` + `/title><st` + `yle>
-.home{
-	width: 750px;
-	margin: 0 auto;}
-.text-contents{
+const head_html = `<!DOCTYPE html>
+<html lang="ru" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"><\/script>
+  <title><\/title>
+  <style>
+    .home { width: 750px; margin: 0 auto; }
+    .text-contents{
 	text-align: center;
 	font-weight: bold;}
 .menu {
@@ -36,9 +42,14 @@
 .dropdown-content a:hover {background-color: #ddd;}
 .dropdown:hover .dropdown-content {display: block;}
 .dropdown:hover .dropbtn {background-color: #3e8e41;}  
-<` + `/style><l` + `ink rel="stylesheet" href="../application.css" media="all"></h` + `ead><bo` + `dy class="h-100"><di` + `v class="home"><` + `article class='hexlet-typography overflow-hidden'>`;
-    const footer = `<` + `/article></` + `div></` + `body></` + `html>`;
-  
+  <\/style>
+  <link rel="stylesheet" href="../application.css" media="all">
+<\/head>
+<body class="h-100">
+  <div class="home">
+    <article class='hexlet-typography overflow-hidden'>`;
+
+const footer = `<\/article><\/div><\/body><\/html>`;
   
 // выводим шапку и футер страницы
 
