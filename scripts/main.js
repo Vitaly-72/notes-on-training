@@ -241,7 +241,7 @@ function saveFile() {
   let menuItems = '';
   Object.keys(menuObj).forEach((key, index) => {
     const artId = `art_${index + 1}`;
-    menuItems += `<a href="#" data-article="${artId}">${index + 1}. ${menuObj[key]}</a>`;
+    menuItems += `<a href="#" class="menu-link" data-article="${artId}">${index + 1}. ${menuObj[key]}</a>`;
   });
 
   // Генерируем статьи
@@ -253,8 +253,7 @@ function saveFile() {
   });
 
   // Полный HTML документ
-  const fullHtml = `
-<!DOCTYPE html>
+  const fullHtml = `<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -340,33 +339,35 @@ function saveFile() {
   </div>
 
   <script>
+    // Функция для отображения выбранной статьи
+    function showArticle(articleId) {
+      // Скрываем все статьи
+      document.querySelectorAll('.art').forEach(art => {
+        art.style.display = 'none';
+      });
+      // Показываем выбранную статью
+      document.getElementById(articleId).style.display = 'block';
+    }
+
+    // Добавляем обработчики для пунктов меню
     document.addEventListener('DOMContentLoaded', function() {
-      // Добавляем обработчики кликов на пункты меню
-      document.querySelectorAll('.dropdown-content a').forEach(link => {
+      document.querySelectorAll('.menu-link').forEach(link => {
         link.addEventListener('click', function(e) {
           e.preventDefault();
           const articleId = this.getAttribute('data-article');
-          
-          // Скрываем все статьи
-          document.querySelectorAll('.art').forEach(art => {
-            art.style.display = 'none';
-          });
-          
-          // Показываем выбранную статью
-          document.getElementById(articleId).style.display = 'block';
+          showArticle(articleId);
         });
       });
-      
-      // Данные для загрузки обратно в редактор
-      const title2 = '${title}';
-      const menuObj2 = ${JSON.stringify(menuObj)};
-      const contentObj2 = ${JSON.stringify(contentObj)};
-      const styleObj2 = ${JSON.stringify(styleObj)};
     });
+
+    // Данные для загрузки обратно в редактор
+    const title2 = '${title}';
+    const menuObj2 = ${JSON.stringify(menuObj)};
+    const contentObj2 = ${JSON.stringify(contentObj)};
+    const styleObj2 = ${JSON.stringify(styleObj)};
   </script>
 </body>
-</html>
-  `;
+</html>`;
 
   // Создаем и скачиваем файл
   const blob = new Blob([fullHtml], { type: 'text/html' });
@@ -379,7 +380,6 @@ function saveFile() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-
 // Загрузка файла для редактирования
 function loadFile(event) {
   const file = event.target.files[0];
