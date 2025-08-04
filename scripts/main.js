@@ -1,419 +1,197 @@
-// Константы шапки и футера
-const headHtml = `<!DOCTYPE html><html lang="ru" prefix="og: https://ogp.me/ns#">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
-  <title></title>
-  <style>
-    .home { width: 750px; margin: 0 auto; }
-    .text-contents { text-align: center; font-weight: bold; }
-    .menu { position: absolute; top: 20px; left: 20px; }
-    .dropbtn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 16px;
-      font-size: 14px;
-      border: none;
-    }
-    .dropdown { position: relative; display: inline-block; z-index: 9999; }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #f1f1f1;
-      min-width: 320px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      z-index: 1;
-    }
-    .dropdown-content a {
-      font-size: 12px;
-      color: black;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-    }
-    .dropdown-content a:hover { background-color: #ddd; }
-    .dropdown:hover .dropdown-content { display: block; }
-    .dropdown:hover .dropbtn { background-color: #3e8e41; }
-  </style>
-  <link rel="stylesheet" href="../application.css" media="all">
-</head>
-<body class="h-100">
-  <div class="home">
-    <article class='hexlet-typography overflow-hidden'>`;
-
-const footerHtml = `</article></div></body></html>`;
-
-// Инициализация переменных
-let menuTxt = '';
-let styleTxt = '';
-let menuObj = {};
-let contentObj = {};
-let styleObj = {};
-let title = '';
-let currentArticle = 1;
-
-// DOM готов
-$(document).ready(function() {
-  $("#head").text(headHtml);
-  $("#footer").text(footerHtml);
-  
-  // Обработчики событий
-  $("#btn").click(createArticle);
-  $("#apply-btn").click(updateArticle);
-  $("#clear-btn").click(clearFields);
-  $("#save-btn").click(saveFile);
-  $("#file-input").change(loadFile);
-});
-
-// Создание новой статьи
-function createArticle() {
-  const articleTitle = $("#punkt_menu").val().trim();
-  const articleContent = $("#lesson").val().trim();
-  
-  if (!articleTitle || !articleContent) {
-    alert("Заполните название и содержание статьи");
-    return;
-  }
-  
-  const articleId = Object.keys(contentObj).length + 1;
-  
-  title = $("#name_kurs").val();
-  menuObj[`art${articleId}`] = articleTitle;
-  contentObj[`art${articleId}`] = articleContent;
-  
-  if (articleId === 1) {
-    styleTxt = `#art_1{display:block}`;
-  } else {
-    styleTxt = `#art_${articleId}{display:none}`;
-  }
-  
-  styleObj[`art${articleId}`] = styleTxt;
-  currentArticle = articleId;
-  
-  updateArticlesView();
-  clearFields();
-}
-
-// Обновление существующей статьи
-function updateArticle() {
-  if (!currentArticle) {
-    alert("Сначала выберите статью для редактирования");
-    return;
-  }
-  
-  const articleTitle = $("#punkt_menu").val().trim();
-  const articleContent = $("#lesson").val().trim();
-  
-  if (!articleTitle || !articleContent) {
-    alert("Заполните название и содержание статьи");
-    return;
-  }
-  
-  menuObj[`art${currentArticle}`] = articleTitle;
-  contentObj[`art${currentArticle}`] = articleContent;
-  
-  updateArticlesView();
-  clearFields();
-  currentArticle = null;
-}
-
-// Обновление отображения статей и меню
-function updateArticlesView() {
-  let menuHtml = '';
-  let articlesHtml = '';
-  let styleHtml = '';
-  let scriptHtml = '';
-  let menuItemsHtml = '';
-  
-  // Генерация HTML для меню и статей
-  Object.keys(menuObj).forEach((key, index) => {
-    const id = index + 1;
-    
-    // Меню для экспортируемого файла
-    menuHtml += `<a href="#" onclick="showArticle('art_${id}')">${id}. ${menuObj[key]}</a>`;
-    
-    // Статьи
-    articlesHtml += `<div id="art_${id}" class="art">${contentObj[key]}</div>`;
-    
-    // Стили
-    styleHtml += id === 1 
-      ? `#art_${id}{display:block}`
-      : `#art_${id}{display:none}`;
-    
-    // Меню для редактора
-    menuItemsHtml += `
-      <li onclick="loadArticle(${id})">
-        ${id}. ${menuObj[key]}
-        <button type="button" onclick="event.stopPropagation(); deleteArticle(${id})">X</button>
-      </li>`;
-  });
-  
-  // Обновление DOM
-  $("#menu").html(`<div class='menu'>
-    <div class='dropdown'>
-      <button class='dropbtn'>Меню</button>
-      <div class='dropdown-content'>${menuHtml}</div>
-    </div>
-  </div>`);
-  
-  $("#article").html(articlesHtml);
-  $("#style").html(`<style>${styleHtml}</style>`);
-  
-  // Генерация скрипта для экспортируемого файла
-  const scriptContent = `
-    function showArticle(id) {
-      document.querySelectorAll('.art').forEach(art => {
-        art.style.display = 'none';
-      });
-      document.getElementById(id).style.display = 'block';
-      return false;
-    }
-    
-    // Данные для загрузки обратно в редактор
-    const title2 = '${title}';
-    const menuObj2 = ${JSON.stringify(menuObj)};
-    const contentObj2 = ${JSON.stringify(contentObj)};
-    const styleObj2 = ${JSON.stringify(styleObj)};
-  `;
-  
-  $("#script").text(`<script>${scriptContent}</script>`);
-  $("#menu_kursa").html(`<ul>${menuItemsHtml}</ul>`);
-}
-
-// Загрузка статьи для редактирования
-function loadArticle(id) {
-  currentArticle = id;
-  $("#punkt_menu").val(menuObj[`art${id}`]);
-  $("#lesson").val(contentObj[`art${id}`]);
-}
-
-// Удаление статьи
-function deleteArticle(id) {
-  if (confirm("Удалить эту статью?")) {
-    delete menuObj[`art${id}`];
-    delete contentObj[`art${id}`];
-    delete styleObj[`art${id}`];
-    
-    // Перенумеровываем оставшиеся статьи
-    const newMenuObj = {};
-    const newContentObj = {};
-    const newStyleObj = {};
-    
-    Object.keys(menuObj).forEach((key, index) => {
-      const newKey = `art${index + 1}`;
-      newMenuObj[newKey] = menuObj[key];
-      newContentObj[newKey] = contentObj[key];
-      newStyleObj[newKey] = styleObj[key];
-    });
-    
-    menuObj = newMenuObj;
-    contentObj = newContentObj;
-    styleObj = newStyleObj;
-    
-    updateArticlesView();
-    clearFields();
-    currentArticle = null;
-  }
-}
-
-// Очистка полей ввода
-function clearFields() {
-  $("#punkt_menu").val('');
-  $("#lesson").val('');
-}
-
-
-// Сохранение в файл
-function saveFile() {
-  if (!title) {
-    alert("Введите название документа");
-    return;
-  }
-
-  if (Object.keys(menuObj).length === 0) {
-    alert("Добавьте хотя бы одну статью");
-    return;
-  }
-
-  // Генерируем меню
-  let menuItems = '';
-  Object.keys(menuObj).forEach((key, index) => {
-    const artId = `art_${index + 1}`;
-    menuItems += `<a href="#" class="menu-link" data-article="${artId}">${index + 1}. ${menuObj[key]}</a>`;
-  });
-
-  // Генерируем статьи
-  let articles = '';
-  Object.keys(contentObj).forEach((key, index) => {
-    const artId = `art_${index + 1}`;
-    const displayStyle = index === 0 ? 'block' : 'none';
-    articles += `<div id="${artId}" class="art" style="display:${displayStyle}">${contentObj[key]}</div>`;
-  });
-
-  // Полный HTML документ
-  const fullHtml = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 20px;
-    }
-    .menu {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 1000;
-    }
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    .dropbtn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: #f9f9f9;
-      min-width: 250px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      z-index: 1;
-      border-radius: 4px;
-    }
-    .dropdown-content a {
-      color: black;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-      transition: background-color 0.3s;
-    }
-    .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-    .dropdown:hover .dropbtn {
-      background-color: #3e8e41;
-    }
-    .content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .art {
-      display: none;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-  </style>
-</head>
-<body>
-  <div class="menu">
-    <div class="dropdown">
-      <button class="dropbtn">Меню</button>
-      <div class="dropdown-content">
-        ${menuItems}
-      </div>
-    </div>
-  </div>
-
-  <div class="content">
-    ${articles}
-  </div>
-
-  <script>
-    // Функция для отображения выбранной статьи
-    function showArticle(articleId) {
-      // Скрываем все статьи
-      document.querySelectorAll('.art').forEach(art => {
-        art.style.display = 'none';
-      });
-      // Показываем выбранную статью
-      document.getElementById(articleId).style.display = 'block';
-    }
-
-    // Добавляем обработчики для пунктов меню
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.menu-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          const articleId = this.getAttribute('data-article');
-          showArticle(articleId);
-        });
-      });
-    });
-
-    // Данные для загрузки обратно в редактор
-    const title2 = '${title}';
-    const menuObj2 = ${JSON.stringify(menuObj)};
-    const contentObj2 = ${JSON.stringify(contentObj)};
-    const styleObj2 = ${JSON.stringify(styleObj)};
+    // константы Шапки и футера
+    const head_html = `<!DOCTYPE html><html lang="ru" prefix="og: http` + `s://ogp.me/ns#"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="IE=Edge" http-equiv="X-UA-Compatible"><script src="http` + `s://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></scri` + `pt><ti` + `tle><` + `/title><st` + `yle>
+.home{
+	width: 750px;
+	margin: 0 auto;}
+.text-contents{
+	text-align: center;
+	font-weight: bold;}
+.menu {
+  position: absolute;
+  top: 20px;
+  left: 20px;}
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 14px;
+    border: none;}
+.dropdown {
+    position: relative;
+    display: inline-block;
+	z-index: 9999;}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 320px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;}
+.dropdown-content a {
+    font-size: 12px;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;}
+.dropdown-content a:hover {background-color: #ddd;}
+.dropdown:hover .dropdown-content {display: block;}
+.dropdown:hover .dropbtn {background-color: #3e8e41;}  
+<` + `/style><l` + `ink rel="stylesheet" href="../application.css" media="all"></h` + `ead><bo` + `dy class="h-100"><di` + `v class="home"><` + `article class='hexlet-typography overflow-hidden'>`;
+    const footer = `<` + `/article></` + `div></` + `body></` + `html>`;
   </script>
-</body>
-</html>`;
+  <script>
+// выводим шапку и футер страницы
 
-  // Создаем и скачиваем файл
-  const blob = new Blob([fullHtml], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-// Загрузка файла для редактирования
-function loadFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    // Временный элемент для парсинга
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = e.target.result;
+ $(document).ready(function() {
+     $("#head").text(head_html);
+     $("#footer").text(footer);
+ });
+ 
+ // создаем пустые переменные для динамического заполения, нажатием кнопки "добавить"
+ 
+ let menu_txt = '';
+ let style_txt = '';
+ let menuObj = {};
+ let contentObj = {};
+ let styleObj = {};
+ let title = '';
+ 
+ // Функция добавляем в обьекты свойства: Название документа, название статьи, контент, стили скрытия статей
+ 
+ const creatObj = () => {
+         if (Object.keys(contentObj).length == 0) {
+             i = 1
+         } else {
+             i = Object.keys(contentObj).length + 1;
+         }
+         title = document.getElementById("name_kurs").value;
+         menuObj[`art${i}`] = document.getElementById("punkt_menu").value;
+         contentObj[`art${i}`] = document.getElementById("lesson").value;
+         if (i == 1) {
+             style_txt += `#art_${i}{display:block}`
+         } else {
+             style_txt = `#art_${i}{display:none}`;
+         }
+         styleObj[`art${i}`] = style_txt;
+         i += 1;
+         console.log(title);
+         console.log(menuObj);
+         console.log(contentObj);
+         console.log(styleObj);
+         addArticlesPage();
+         remove();
+     }
+
+// функция вывода статей и меню при загрузки сохраненного документа в редакторе
+
+ const crObj = () => {
+     menuObj = menuObj2;
+     contentObj = contentObj2;
+     styleObj = styleObj2;
+     document.getElementById("name_kurs").value = title2;
+     document.getElementById("punkt_menu").value = menuObj2.art1;
+     document.getElementById("lesson").value = contentObj2.art1;
+ }
+ const addArticlesPage = () => {
+     menuObj3 = {};
+     contentObj3 = {};
+     styleObj3 = {};
+     let creatMenu = '';
+     let creatCourse = '';
+     let creatStyle = '';
+     let cretScript = '';
+     let creatMenuObj = '';
+     let creatContentObj = '';
+     let creatStyleObj = '';
+     let creatMenuCourse = '';
+     index = 1;
+     
+	 // Добавляем пункты в меню страницы курса
+     for (key in menuObj) {
+         creatMenu += `<\div id="menu_${index}"><\a href="#" >${index}. ${menuObj[key]}</a></div>`;
+         creatMenuObj += `art${index}: '${menuObj[key]}',`;
+         creatMenuCourse += `<li onclick="add(contentObj.art${index}, menuObj.art${index}); punkt = ${index}" >${index}. ${menuObj[key]} &nbsp;&nbsp; <input type="button" onclick="addArticlesPage(); delete menuObj['art${index}']; delete contentObj['art${index}']; delete  styleObj['art${index}']; addArticlesPage();" value="X" /></li>`
+         menuObj3[`art${index}`] = `${menuObj[key]}`;
+         index += 1;
+     }
     
-    try {
-      // Ищем скрипт с данными
-      const scripts = tempDiv.getElementsByTagName('script');
-      for (let script of scripts) {
-        if (script.textContent.includes('title2')) {
-          // Выполняем скрипт, чтобы получить переменные
-          eval(script.textContent);
-          
-          title = title2;
-          menuObj = menuObj2;
-          contentObj = contentObj2;
-          styleObj = styleObj2;
-          
-          $("#name_kurs").val(title);
-          loadArticle(1);
-          updateArticlesView();
-          return;
-        }
-      }
-      throw new Error("Не найдены данные для загрузки");
-    } catch (e) {
-      alert("Ошибка загрузки файла: " + e.message);
-    }
-  };
-  reader.readAsText(file);
-}
+     $("#menu").text("<di" + "v class='menu'><di" + "v class='dropdown'><but" + "ton class='dropbtn'>Меню</" + "button><di" + "v class='dropdown-content'>" + creatMenu + "</" + "div></" + "div></" + "div>");
+     
+    // Добавляем статьи на страницу курса, стили не актывных статей, скрипт работы меню и сохраняем объекты
+
+     index2 = 1;
+     for (key in contentObj) {
+         creatCourse += `<div id="art_${index2}" class="art">${contentObj[key]}</div>`;
+         creatContentObj += `art${index2}: \`${contentObj[key]}\`,`;
+         contentObj3[`art${index2}`] = `${contentObj[key]}`;
+         if (index2 == 1) {
+             creatStyle += `#art_${index2}{display:block}`;
+             creatStyleObj += `art${index2}: '#art_${index2}{display:block}',`;
+             styleObj3[`art${index2}`] = `{display:block}`;
+         } else {
+             creatStyle += `#art_${index2}{display:none}`;
+             creatStyleObj += `art${index2}: '#art_${index2}{display:none}',`;
+             styleObj3[`art${index2}`] = `{display:none}`;
+         }
+         cretScript += ` menu_${index2}.addEventListener("click", () => showDiv('art_${index2}')); `
+         $("#script").text("<sc" + "ript> const showDiv = (id) => {$('.art').hide();$('#' + id).show();} \n	" + cretScript + "\n" + "title2 = '" + title + "'\n" + "menuObj2 = {" + creatMenuObj + "};\n" + "contentObj2 = {" + creatContentObj + "};\n" + "styleObj2 = {" + creatStyleObj + "};\n" + "let checkObj = 1;\n" + "</" + "script>");
+         index2 += 1;
+     }
+     $("#article").text(creatCourse);
+     $("#style").text('<style>' + creatStyle + '</style>');
+     
+	 // Создание меню с текстом статей в редакторе
+	 
+     $("#menu_kursa").html('<ul>' + creatMenuCourse + '</ul>');
+     menuObj = menuObj3;
+     contentObj = contentObj3;
+     styleObj = styleObj3;
+ }
+ const remove = () => {
+     document.getElementById("punkt_menu").value = '';
+     document.getElementById("lesson").value = '';
+ }
+ const add = (id, number) => {
+         document.getElementById("lesson").value = id;
+         document.getElementById("punkt_menu").value = number;
+     }
+     
+// функция изменения текста статьи
+
+ punkt = 1;
+ const addNew = () => {
+     contentObj[`art${punkt}`] = document.getElementById("lesson").value;
+     menuObj[`art${punkt}`] = document.getElementById("punkt_menu").value;
+     addArticlesPage();
+ }
+ btn.addEventListener("click", creatObj);
+ 
+// сохранение в html файл, подумать как пересохранять файл при его изменении в тоже места и с тем же именем
+
+ const saveFile = () => {
+         let url = document.getElementById("name_kurs").value;
+         let textToWrite = document.getElementById("divcopy").innerText;
+         let textFileAsBlob = new Blob([textToWrite], {
+             type: 'text/plain'
+         });
+         let downloadLink = document.createElement("a");
+         downloadLink.download = url + ".html";
+         downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+         downloadLink.click();
+     }
+
+// функция загрузки html файла для редактирования
+	
+ $("#file-input").change(function() {
+     let file = this.files[0];
+     let url = URL.createObjectURL(file);
+     $.ajax({
+         url: url,
+         dataType: "html",
+         success: function(data) {
+             $("#data").html(data);
+         }
+     });
+     setTimeout(crObj, 2000);
+     setTimeout(addArticlesPage, 3000);
+ });
