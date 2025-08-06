@@ -159,6 +159,8 @@ const footer = `<\/article><\/div><\/body><\/html>`;
      }
      $("#article").text(creatCourse);
      $("#style").text('<style>' + creatStyle + '</style>');
+	 const AUTHOR = "Синишин Виталий (vitas-0071@yandex.ru)";
+         const LICENSE = "Проприетарная лицензия. Использование только с разрешения автора.";
      
 	 // Создание меню с текстом статей в редакторе
 	 
