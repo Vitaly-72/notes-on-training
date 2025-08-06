@@ -36,5 +36,5 @@
 Для локального использования:
 
 ```bash
-git clone https://github.com/ваш-username/имя-репозитория.git
-cd имя-репозитория
+git clone https://github.com/Vitaly-72/notes-on-training.git
+cd notes-on-training
