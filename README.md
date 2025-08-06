@@ -1,7 +1,7 @@
 # HTML Notes Editor
 
-[![Live Demo](https://img.shields.io/badge/demo-live-green.svg)](https://github.com/Vitaly-72/notes-on-training/)
-![GitHub last commit](https://github.com/Vitaly-72/notes-on-training/)
+Запустить редактор в разделе Actions  
+
 
 Простой веб-редактор для создания и управления заметками в одном HTML-документе с возможностью экспорта готовых страниц.
 
